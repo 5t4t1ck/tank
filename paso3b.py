@@ -45,7 +45,7 @@ class Escena_Juego(pilasengine.escenas.Escena):
         tanque1.imagen = "images/tanque.png"
         tanque1.rotacion = 90
         mi_control = pilas.control.Control(teclas2)
-        tanque1.aprender("MoverseComoCoche", control=mi_control,velocidad_maxima=2, deceleracion=0.05, velocidad_rotacion=0.5)
+        tanque1.aprender("MoverseComoCoche" control=mi_control,velocidad_maxima=2, deceleracion=0.05, velocidad_rotacion=0.5)
 
         tanque1.aprender("Disparar", frecuencia_de_disparo=2, angulo_salida_disparo=90)
         tanque1_vidas = pilas.actores.Puntaje(x=250, y=200, color="blanco")
@@ -55,7 +55,7 @@ class Escena_Juego(pilasengine.escenas.Escena):
         tanque2.imagen = "images/tanque2.png"
         tanque1.rotacion = 90
         tanque2.aprender("MoverseComoCoche", velocidad_maxima=2, deceleracion=0.05, velocidad_rotacion=0.5)
-        #tanque2.aprender("Disparar", frecuencia_de_disparo=2, angulo_salida_disparo=90)
+        tanque2.aprender("Disparar", frecuencia_de_disparo=2, angulo_salida_disparo=90)
         tanque2_vidas = pilas.actores.Puntaje(x=-250, y=200, color="blanco")
 
     def actualizar(self):
