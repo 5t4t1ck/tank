@@ -17,12 +17,9 @@ teclas2 = {
 class Municion1(pilasengine.actores.Actor):
 
 	def iniciar(self):
-		self.imagen=pilas.imagenes.cargar_grilla("disparo.png", 2)
+		self.imagen="aceituna.png"
 
-class Municion2(pilasengine.actores.Actor):
-
-	def iniciar(self):
-		self.imagen=pilas.imagenes.cargar_grilla("disparo.png", 2)
+pilas.actores.vincular(Municion1)
 
 class Tanque1(pilasengine.actores.Actor):
 
@@ -32,6 +29,8 @@ class Tanque1(pilasengine.actores.Actor):
 
     def actualizar(self):
         pass
+
+pilas.actores.vincular(Tanque1)
 
 
 class Tanque2(pilasengine.actores.Actor):
@@ -43,6 +42,7 @@ class Tanque2(pilasengine.actores.Actor):
     def actualizar(self):
         pass
 
+pilas.actores.vincular(Tanque2)
 
 
 class Escena_Juego(pilasengine.escenas.Escena):
@@ -56,7 +56,9 @@ class Escena_Juego(pilasengine.escenas.Escena):
         tanque1.x = 200
         tanque1.imagen = "images/tanque.png"
         tanque1.rotacion = 90
+
         tanque1.aprender("MoverseComoCoche", velocidad_maxima=2, deceleracion=0.05, velocidad_rotacion=0.5)
+
         tanque1.aprender("Disparar", frecuencia_de_disparo=2, angulo_salida_disparo=90, municion='Municion1')
         tanque1_vidas = pilas.actores.Puntaje(x=250, y=200, color="blanco")
 
@@ -67,11 +69,10 @@ class Escena_Juego(pilasengine.escenas.Escena):
         tanque2.imagen = "images/tanque2.png"
         tanque2.rotacion = 270
         tanque2.aprender("MoverseComoCoche", control=mi_control, velocidad_maxima=2, deceleracion=0.05, velocidad_rotacion=0.5)
-        tanque2.aprender("Disparar", control=mi_control, frecuencia_de_disparo=2, angulo_salida_disparo=90, municion='Municion2')
+        tanque2.aprender("Disparar", control=mi_control, frecuencia_de_disparo=2, angulo_salida_disparo=90)
         tanque2_vidas = pilas.actores.Puntaje(x=-250, y=200, color="blanco")
 
         pilas.colisiones.agregar("Municion1", "Tanque2", self.impacto)
-        pilas.colisiones.agregar("Municion2", "Tanque1", self.impacto)
 
     def impacto(self, proyectil, enemigo):
         proyectil.eliminar()
@@ -104,11 +105,6 @@ class Escena_Menu(pilasengine.escenas.Escena):
 
 pilas.escenas.vincular(Escena_Menu)
 pilas.escenas.vincular(Escena_Juego)
-
-pilas.actores.vincular(Municion1)
-pilas.actores.vincular(Municion2)
-pilas.actores.vincular(Tanque1)
-pilas.actores.vincular(Tanque2)
 
 pilas.escenas.Escena_Menu()
 
