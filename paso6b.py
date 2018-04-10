@@ -29,10 +29,21 @@ class Tanque1(pilasengine.actores.Actor):
     def iniciar(self):
         self.aprender("LimitadoABordesDePantalla")
         self.aprender("PuedeExplotar")
-        x = random.randrange(-320, 320)
+        #x = random.randrange(-320, 320)
         y = random.randrange(-240, 160)
-        self.x = x
+        #self.x = x
         self.y = y
+
+        self.imagen = "images/tanque.png"
+        self.rotacion = 90
+        self.aprender("MoverseComoCoche", velocidad_maxima=2, deceleracion=0.05, velocidad_rotacion=0.5)
+        self.aprender("Disparar", frecuencia_de_disparo=2, angulo_salida_disparo=90, municion='Municion1')
+
+    def aumentar_velocidad(self):
+		self.aprender("MoverseComoCoche", velocidad_maxima=8, deceleracion=0.05, velocidad_rotacion=0.5)
+
+    def reducir_velocidad(self):
+		self.aprender("MoverseComoCoche", velocidad_maxima=2, deceleracion=0.05, velocidad_rotacion=0.5)
 
     def actualizar(self):
         pass
@@ -40,16 +51,24 @@ class Tanque1(pilasengine.actores.Actor):
 
 class Tanque2(pilasengine.actores.Actor):
 
-    def iniciar(self):
-        self.aprender("LimitadoABordesDePantalla")
-        self.aprender("PuedeExplotar")
-        x = random.randrange(-320, 320)
-        y = random.randrange(-240, 160)
-        self.x = x
-        self.y = y
+	def iniciar(self):
+		self.mi_control = pilas.control.Control(teclas2)
+		self.aprender("LimitadoABordesDePantalla")
+		self.aprender("PuedeExplotar")
+		self.y = random.randrange(-240, 160)
+		self.imagen = "images/tanque2.png"
+		self.rotacion = 270
+		self.aprender("MoverseComoCoche", control=self.mi_control, velocidad_maxima=2, deceleracion=0.05, velocidad_rotacion=0.5)
+		self.aprender("Disparar", control=self.mi_control, frecuencia_de_disparo=2, angulo_salida_disparo=90, municion='Municion2')
 
-    def actualizar(self):
-        pass
+	def aumentar_velocidad(self):
+		self.aprender("MoverseComoCoche", control= self.mi_control, velocidad_maxima=4, deceleracion=0.05, velocidad_rotacion=0.5)
+
+	def reducir_velocidad(self):
+		self.aprender("MoverseComoCoche", control= self.mi_control, velocidad_maxima=2, deceleracion=0.05, velocidad_rotacion=0.5)
+
+	def actualizar(self):
+		pass
 
 
 
@@ -63,10 +82,6 @@ class Escena_Juego(pilasengine.escenas.Escena):
         tanque1= pilas.actores.Tanque1()
         self.tanque1 = tanque1
         tanque1.x = 200
-        tanque1.imagen = "images/tanque.png"
-        tanque1.rotacion = 90
-        tanque1.aprender("MoverseComoCoche", velocidad_maxima=2, deceleracion=0.05, velocidad_rotacion=0.5)
-        tanque1.aprender("Disparar", frecuencia_de_disparo=2, angulo_salida_disparo=90, municion='Municion1')
 
         texto_t1 = pilas.actores.Texto("Rojo:", x=-250, y=200)
         texto_t1.definir_color(pilas.colores.blanco)
@@ -74,15 +89,12 @@ class Escena_Juego(pilasengine.escenas.Escena):
         vidas1.aumentar("3")
         self.vidas1 = vidas1
 
-        mi_control = pilas.control.Control(teclas2)
+        #mi_control = pilas.control.Control(teclas2)
 
         tanque2 = pilas.actores.Tanque2()
         self.tanque2 = tanque2
         tanque2.x = -200
-        tanque2.imagen = "images/tanque2.png"
-        tanque2.rotacion = 270
-        tanque2.aprender("MoverseComoCoche", control=mi_control, velocidad_maxima=2, deceleracion=0.05, velocidad_rotacion=0.5)
-        tanque2.aprender("Disparar", control=mi_control, frecuencia_de_disparo=2, angulo_salida_disparo=90, municion='Municion2')
+        #cambiado a la def iniciar de la class Tanque
 
         texto_t2 = pilas.actores.Texto("Verde:", x=210, y=200)
         texto_t2.definir_color(pilas.colores.blanco)
@@ -93,24 +105,29 @@ class Escena_Juego(pilasengine.escenas.Escena):
         pilas.colisiones.agregar("Municion1", "Tanque2", self.impacto1)
         pilas.colisiones.agregar("Municion2", "Tanque1", self.impacto2)
 
-        self.tareas.siempre(0.5, self.crear_estrella)
+
+        ###colisiones entre tanques y estrellas cambiadas aquí###
+        pilas.colisiones.agregar("Tanque1", "Estrella", self._aumentar_velocidad)
+        pilas.colisiones.agregar("Tanque2", "Estrella", self._aumentar_velocidad)
+
+        tarea_estrella = pilas.tareas.siempre(3, self.crear_estrella)
+
+
+
 
     def crear_tanque1(self):
         tanque1= pilas.actores.Tanque1()
         tanque1.x = 200
-        tanque1.imagen = "images/tanque.png"
-        tanque1.rotacion = 90
-        tanque1.aprender("MoverseComoCoche", velocidad_maxima=2, deceleracion=0.05, velocidad_rotacion=0.5)
-        tanque1.aprender("Disparar", frecuencia_de_disparo=2, angulo_salida_disparo=90, municion='Municion1')
+        ###Trasladado a la def iniciar de la class Tanque1###
 
     def crear_tanque2(self):
-        mi_control = pilas.control.Control(teclas2)
+        #mi_control = pilas.control.Control(teclas2)
         tanque2 = pilas.actores.Tanque2()
         tanque2.x = -200
-        tanque2.imagen = "images/tanque2.png"
-        tanque2.rotacion = 270
-        tanque2.aprender("MoverseComoCoche", control=mi_control, velocidad_maxima=2, deceleracion=0.05, velocidad_rotacion=0.5)
-        tanque2.aprender("Disparar", control=mi_control, frecuencia_de_disparo=2, angulo_salida_disparo=90, municion='Municion2')
+        #tanque2.imagen = "images/tanque2.png"
+        #tanque2.rotacion = 270
+        #tanque2.aprender("MoverseComoCoche", control=mi_control, velocidad_maxima=2, deceleracion=0.05, velocidad_rotacion=0.5)
+        #tanque2.aprender("Disparar", control=mi_control, frecuencia_de_disparo=2, angulo_salida_disparo=90, municion='Municion2')
 
     def impacto1(self, proyectil1, enemigo1):
         proyectil1.eliminar()
@@ -119,8 +136,9 @@ class Escena_Juego(pilasengine.escenas.Escena):
         if self.vidas1.obtener() > 0:
             self.vidas1.reducir()
             self.crear_tanque2()
+            pilas.avisar("vidas1 > 0")
         if self.vidas1.obtener() == 0:
-            self.tanque2.eliminar()
+            pilas.avisar("Se cumple que vidas1 == 0")
             self.efecto_ganador(self.tanque1)
 
 
@@ -132,8 +150,8 @@ class Escena_Juego(pilasengine.escenas.Escena):
             self.vidas2.reducir()
             self.crear_tanque1()
         if self.vidas2.obtener() == 0:
-            self.tanque1.eliminar()
             self.efecto_ganador(self.tanque2)
+            self.tanque1.eliminar()
 
     def efecto_ganador(self, ganador):
         ganador.x = [0]
@@ -146,18 +164,23 @@ class Escena_Juego(pilasengine.escenas.Escena):
         y = random.randrange(-240, 240)
         estrella = pilas.actores.Estrella(x, y)
         estrella.escala = 0.4
-        self.colisiones.agregar(
+
+        ###cambiada a la def iniciar de la escena###
+        """self.colisiones.agregar(
         [self.tanque1, self.tanque2],
         estrella,
-        self.aumentar_velocidad)
+        self.aumentar_velocidad)"""
+        #############################################
 
-    def aumentar_velocidad(self, tanque, estrella):
+    def _aumentar_velocidad(self, tanque, estrella):
+        tanque.aumentar_velocidad()
+        #tanque.aprender("MoverseComoCoche", velocidad_maxima=4)
+        pilas.tareas.agregar(5, tanque.reducir_velocidad)
         estrella.eliminar()
-        tanque.aprender("MoverseComoCoche", velocidad_maxima=4)
-        self.tareas.una_vez(5, self.reducir_velocidad, [tanque])
+        if tanque == self.tanque2:
+            self.tanque.mi_control= self.mi_control
 
-    def reducir_velocidad(self, tanque):
-        tanque.aprender("MoverseComoCoche", velocidad_maxima=2)
+	#def reducir_velocidad cambiada a cada una de las class Tanque
 
     def actualizar(self):
         pass
