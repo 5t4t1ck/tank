@@ -1,134 +1,116 @@
 # -*- encoding: utf-8 -*-
-#
-# Creamos los marcadores de vidas y restamos vida con impacto.
 
 import random
+import pilasengine
 
-import pilas
-from pilas.escena import Normal
-from pilas.actores import Actor
+pilas = pilasengine.iniciar()
+pilas.reiniciar_si_cambia(__file__)
 
+teclas2 = {
+            pilas.simbolos.a: 'izquierda',
+            pilas.simbolos.d: 'derecha',
+            pilas.simbolos.w: 'arriba',
+            pilas.simbolos.s: 'abajo',
+            pilas.simbolos.CTRL: 'boton',
+        }
 
-class Tanque(Actor):
+class Municion1(pilasengine.actores.Actor):
 
-    def __init__(self, control, imagen, vidas):
+	def iniciar(self):
+		self.imagen=pilas.imagenes.cargar_grilla("disparo.png", 2)
 
-        # Obtenemos la imagen del tanque.
-        imagen_tanque = pilas.imagenes.cargar_imagen(imagen)
+class Municion2(pilasengine.actores.Actor):
 
-        x = random.randrange(-320, 320)
-        y = random.randrange(-240, 240)
+	def iniciar(self):
+		self.imagen=pilas.imagenes.cargar_grilla("disparo.png", 2)
 
-        # Iniciamos el actor con la imagen del tanque.
-        super(Tanque, self).__init__(imagen_tanque, x=x, y=y)
+class Tanque1(pilasengine.actores.Actor):
 
-        # Establecemos la habilidad de disparar al tanque.
-        self.aprender(pilas.habilidades.Disparar,
-                      control=control,
-                      frecuencia_de_disparo=2)
+    def iniciar(self):
+        self.aprender("LimitadoABordesDePantalla")
+        self.aprender("PuedeExplotar")
 
-        # Establecemos la habilidad de moverse.
-        self.aprender(pilas.habilidades.MoverseComoCoche,
-                      control=control,
-                      velocidad_maxima=2,
-                      deceleracion=0.05,
-                      velocidad_rotacion=0.5)
-
-        # Habilidad para que nunca desaparezca de la pantalla.
-        self.aprender(pilas.habilidades.SeMantieneEnPantalla)
-
-        self.aprender(pilas.habilidades.PuedeExplotar)
-
-        self.vidas = vidas
-
-    def definir_enemigo(self, enemigo):
-        self.habilidades.Disparar.definir_colision(enemigo, self.impacto)
-        self.enemigo = enemigo
-
-    def impacto(self, proyectil, enemigo):
-        proyectil.eliminar()
-        pilas.actores.Humo(proyectil.x, proyectil.y)
-        enemigo.quitar_vida()
-
-    def quitar_vida(self, cantidad=1):
-        self.vidas.reducir(cantidad)
-        if self.vidas.obtener() <= 0:
-            self.eliminar()
+    def actualizar(self):
+        pass
 
 
-class Escena_Juego(Normal):
+class Tanque2(pilasengine.actores.Actor):
+
+    def iniciar(self):
+        self.aprender("LimitadoABordesDePantalla")
+        self.aprender("PuedeExplotar")
+
+    def actualizar(self):
+        pass
+
+
+
+class Escena_Juego(pilasengine.escenas.Escena):
     """ Escena principal del juego. """
 
     def iniciar(self):
         # Cargamos el fondo del juego.
-        pilas.fondos.Pasto()
+        self.imagen = pilas.fondos.Pasto()
 
-        VIDAS_INICIALES = 3
+        tanque1= pilas.actores.Tanque1()
+        tanque1.x = 200
+        tanque1.imagen = "images/tanque.png"
+        tanque1.rotacion = 90
+        tanque1.aprender("MoverseComoCoche", velocidad_maxima=2, deceleracion=0.05, velocidad_rotacion=0.5)
+        tanque1.aprender("Disparar", frecuencia_de_disparo=2, angulo_salida_disparo=90, municion='Municion1')
+        tanque1_vidas = pilas.actores.Puntaje(x=250, y=200, color="blanco")
 
-        self.vidas_J1 = pilas.actores.Puntaje(VIDAS_INICIALES, x=250, y=200,
-                                              color=pilas.colores.blanco)
-        texto_J1 = pilas.actores.Texto("Verde:", x=200, y=200)
-        texto_J1.definir_color(pilas.colores.blanco)
+        mi_control = pilas.control.Control(teclas2)
 
-        self.tanque_J1 = self.crear_tanque(pilas.simbolos.ARRIBA,
-                                           pilas.simbolos.ABAJO,
-                                           pilas.simbolos.IZQUIERDA,
-                                           pilas.simbolos.DERECHA,
-                                           pilas.simbolos.ALTGR,
-                                           "images/tanque.png",
-                                           self.vidas_J1)
+        tanque2 = pilas.actores.Tanque2()
+        tanque2.x = -200
+        tanque2.imagen = "images/tanque2.png"
+        tanque2.rotacion = 270
+        tanque2.aprender("MoverseComoCoche", control=mi_control, velocidad_maxima=2, deceleracion=0.05, velocidad_rotacion=0.5)
+        tanque2.aprender("Disparar", control=mi_control, frecuencia_de_disparo=2, angulo_salida_disparo=90, municion='Municion2')
+        tanque2_vidas = pilas.actores.Puntaje(x=-250, y=200, color="blanco")
 
-        texto_J2 = pilas.actores.Texto("Rojo:", x=-250, y=200)
-        texto_J2.definir_color(pilas.colores.blanco)
+        pilas.colisiones.agregar("Municion1", "Tanque2", self.impacto)
+        pilas.colisiones.agregar("Municion2", "Tanque1", self.impacto)
 
-        self.vidas_J2 = pilas.actores.Puntaje(VIDAS_INICIALES, x=-200, y=200,
-                                              color=pilas.colores.blanco)
-        self.tanque_J2 = self.crear_tanque(pilas.simbolos.w,
-                                           pilas.simbolos.s,
-                                           pilas.simbolos.a,
-                                           pilas.simbolos.d,
-                                           pilas.simbolos.SHIFT,
-                                           "images/tanque2.png",
-                                           self.vidas_J2)
+    def impacto(self, proyectil, enemigo):
+        proyectil.eliminar()
+        pilas.actores.Humo(proyectil.x, proyectil.y)
+        #print("IMPACTO")
+        enemigo.eliminar()
 
-        self.tanque_J1.definir_enemigo(self.tanque_J2)
-        self.tanque_J2.definir_enemigo(self.tanque_J1)
+    def actualizar(self):
+        pass
 
-    def crear_tanque(self, arriba, abajo, izquierda, derecha, disparo, imagen,
-                     vidas):
-
-        teclas = {izquierda: 'izquierda',
-                  derecha: 'derecha',
-                  arriba: 'arriba',
-                  abajo: 'abajo',
-                  disparo: 'boton'}
-        control = pilas.control.Control(pilas.escena_actual(), teclas)
-        tanque = Tanque(control, imagen, vidas)
-        return tanque
-
-
-class Escena_Menu(Normal):
+class Escena_Menu(pilasengine.escenas.Escena):
     """ Escena del menú del juego. """
-
-    def iniciar_juego(self):
-        pilas.cambiar_escena(Escena_Juego())
-
-    def salir_del_juego(self):
-        pilas.terminar()
 
     def iniciar(self):
         # Cargamos el fondo del juego.
         pilas.fondos.Tarde()
-
-        opciones = [
-            ('Iniciar Juego', self.iniciar_juego),
-            ('Salir', self.salir_del_juego),
+        menu = pilas.actores.Menu(
+        [
+        (u'Iniciar Juego', self.iniciar_juego),
+        (u'Salir', self.salir_del_juego),
         ]
+        )
 
-        pilas.actores.Menu(opciones)
+    def salir_del_juego(self):
+        pilas.terminar()
 
-pilas.iniciar()
+    def iniciar_juego(self):
+        pilas.escenas.Escena_Juego()
 
-pilas.cambiar_escena(Escena_Menu())
+
+pilas.escenas.vincular(Escena_Menu)
+pilas.escenas.vincular(Escena_Juego)
+
+pilas.actores.vincular(Municion1)
+pilas.actores.vincular(Municion2)
+pilas.actores.vincular(Tanque1)
+pilas.actores.vincular(Tanque2)
+
+pilas.escenas.Escena_Menu()
+
 
 pilas.ejecutar()

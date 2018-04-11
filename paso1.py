@@ -2,41 +2,42 @@
 #
 # Creamos las escenas y el menú del juego
 
-import pilas
-from pilas.escena import Normal
+import pilasengine
 
+pilas = pilasengine.iniciar()
 
-class Escena_Juego(Normal):
+class Escena_Juego(pilasengine.escenas.Escena):
     """ Escena principal del juego. """
 
     def iniciar(self):
         # Cargamos el fondo del juego.
-        pilas.fondos.Pasto()
+        self.imagen = pilas.fondos.Pasto()
 
 
-class Escena_Menu(Normal):
+class Escena_Menu(pilasengine.escenas.Escena):
     """ Escena del menú del juego. """
-
-    def iniciar_juego(self):
-        pilas.cambiar_escena(Escena_Juego())
-
-    def salir_del_juego(self):
-        pilas.terminar()
 
     def iniciar(self):
         # Cargamos el fondo del juego.
         pilas.fondos.Tarde()
-
-        opciones = [
-            ('Iniciar Juego', self.iniciar_juego),
-            ('Salir', self.salir_del_juego),
+        menu = pilas.actores.Menu(
+        [
+        (u'Iniciar Juego', self.iniciar_juego),
+        (u'Salir', self.salir_del_juego),
         ]
+        )
 
-        pilas.actores.Menu(opciones)
+    def salir_del_juego(self):
+        pilas.terminar()
+
+    def iniciar_juego(self):
+        pilas.escenas.Escena_Juego()
 
 
-pilas.iniciar()
+pilas.escenas.vincular(Escena_Menu)
+pilas.escenas.vincular(Escena_Juego)
 
-pilas.cambiar_escena(Escena_Menu())
+pilas.escenas.Escena_Menu()
+
 
 pilas.ejecutar()
